@@ -76,9 +76,11 @@ set_window_transform (int window_w, int window_h)
 
 
 static Image
-new_image (u32 w, u32 h)
+new_image (u32 w, u32 h, int x, int y)
 {
   Image image = {};
+  image.x = x;
+  image.y = y;
   image.w = w;
   image.h = h;
   image.pixels = (V3 *) malloc (sizeof (V3) * image.w * image.h);
@@ -142,11 +144,15 @@ main()
 
   set_window_transform (MAIN_WINDOW_INIT_WIDTH, MAIN_WINDOW_INIT_HEIGHT);
 
-  Image image0 = new_image (400, 400);
-  Image image1 = new_image (400, 400);
-
-  image0.x = -200;
-  image1.x =  200;
+  u32   images_count = 6;
+  Image images[6] = {
+    new_image (300, 300, -300,  150),
+    new_image (300, 300,    0,  150),
+    new_image (300, 300,  300,  150),
+    new_image (300, 300, -300, -150),
+    new_image (300, 300,    0, -150),
+    new_image (300, 300,  300, -150),
+  };
 
   glEnable (GL_TEXTURE_2D);
   glClearColor (0.20, 0.25, 0.30, 1.0);
@@ -178,13 +184,21 @@ main()
 
       glClear (GL_COLOR_BUFFER_BIT);
 
-      draw_moving_tiles (image0);
-      radial_gradient_fill (image1, 0x000000, 0x00FFFF);
+      static int x = 0;
+      draw_gradient_tiles    (images[0], x, x);
+      radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
+      diagonal_gradient_fill (images[2], 0x0000FF, 0x00FFFF);
+      draw_gradient_tiles (images[3], -x,  x);
+      draw_gradient_tiles (images[4],  x, -x);
+      draw_gradient_tiles (images[5], -x, -x);
 
-      update_image_texture (image0);
-      update_image_texture (image1);
-      show_image           (image0);
-      show_image           (image1);
+      ++x;
+
+      for (u32 i = 0; i < images_count; ++i)
+        {
+          update_image_texture (images[i]);
+          show_image           (images[i]);
+        }
 
       SDL_GL_SwapWindow (main_window);
     }

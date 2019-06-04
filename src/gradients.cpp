@@ -92,28 +92,31 @@ void linear_horizontal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 
     }
 }
 
-void diagonal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2)
+
+static void
+diagonal_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
 {
-    u8 r1 = (hex_color1 & 0xff0000) >> 16;
-    u8 g1 = (hex_color1 & 0x00ff00) >> 8;
-    u8 b1 = (hex_color1 & 0x0000ff);
-    u8 r2 = (hex_color2 & 0xff0000) >> 16;
-    u8 g2 = (hex_color2 & 0x00ff00) >> 8;
-    u8 b2 = (hex_color2 & 0x0000ff);
+  u8 r1 = (hex_color1 & 0xff0000) >> 16;
+  u8 g1 = (hex_color1 & 0x00ff00) >> 8;
+  u8 b1 = (hex_color1 & 0x0000ff);
+  u8 r2 = (hex_color2 & 0xff0000) >> 16;
+  u8 g2 = (hex_color2 & 0x00ff00) >> 8;
+  u8 b2 = (hex_color2 & 0x0000ff);
 
-    for (u32 y = 0; y < image_h; y++)
+  for (u32 y = 0; y < image.h; y++)
     {
-        V3 pixel = {};
-        for (u32 x = 0; x < image_w; x++)
+      V3 pixel = {};
+      for (u32 x = 0; x < image.w; x++)
         {
-            pixel.r = r1 +r2*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h)-r1*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h);
-            pixel.g = g1 +g2*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h)-g1*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h);
-            pixel.b = b1 +b2*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h)-b1*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h);
+          pixel.r = r1 +r2*(x*image.w+y*image.h)/(image.w*image.w+image.h*image.h)-r1*(x*image.w+y*image.h)/(image.w*image.w+image.h*image.h);
+          pixel.g = g1 +g2*(x*image.w+y*image.h)/(image.w*image.w+image.h*image.h)-g1*(x*image.w+y*image.h)/(image.w*image.w+image.h*image.h);
+          pixel.b = b1 +b2*(x*image.w+y*image.h)/(image.w*image.w+image.h*image.h)-b1*(x*image.w+y*image.h)/(image.w*image.w+image.h*image.h);
 
-            pixels[y * image_w + x] = pixel;
+          image.pixels[y * image.w + x] = pixel;
         }
     }
 }
+
 
 static void
 radial_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
@@ -151,10 +154,8 @@ radial_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
 
 
 static void
-draw_moving_tiles (Image image)
+draw_gradient_tiles (Image image, int x_offset, int y_offset)
 {
-  static u32 x_offset = 0;
-  static u32 y_offset = 0;
   V3 pixel = {};
   for (u32 y = 0; y < image.h; ++y)
     {
@@ -165,6 +166,4 @@ draw_moving_tiles (Image image)
           image.pixels[image.w * y + x] = pixel;
         }
     }
-  ++x_offset;
-  ++y_offset;
 }

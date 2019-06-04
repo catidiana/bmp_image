@@ -115,35 +115,56 @@ void diagonal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color
     }
 }
 
-void radial_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2)
+static void
+radial_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
 {
-    u8 r1 = (hex_color1 & 0xff0000) >> 16;
-    u8 g1 = (hex_color1 & 0x00ff00) >> 8;
-    u8 b1 = (hex_color1 & 0x0000ff);
-    u8 r2 = (hex_color2 & 0xff0000) >> 16;
-    u8 g2 = (hex_color2 & 0x00ff00) >> 8;
-    u8 b2 = (hex_color2 & 0x0000ff);
+  u8 r1 = (hex_color1 & 0xff0000) >> 16;
+  u8 g1 = (hex_color1 & 0x00ff00) >> 8;
+  u8 b1 = (hex_color1 & 0x0000ff);
+  u8 r2 = (hex_color2 & 0xff0000) >> 16;
+  u8 g2 = (hex_color2 & 0x00ff00) >> 8;
+  u8 b2 = (hex_color2 & 0x0000ff);
 
-    for (u32 y = 0; y < image_h; y++)
+  for (u32 y = 0; y < image.h; y++)
     {
-        V3 pixel = {};
-        for (u32 x = 0; x < image_w; x++)
+      V3 pixel = {};
+      for (u32 x = 0; x < image.w; x++)
         {
-         if(image_h<=image_w)
-         {
-            double fraction = ((x-image_w/2.0)*(x-image_w/2.0)+(y-image_h/2.0)*(y-image_h/2.0))/(image_h*image_h/4.0);
+          if(image.h <= image.w)
+            {
+              double fraction = ((x-image.w/2.0)*(x-image.w/2.0)+(y-image.h/2.0)*(y-image.h/2.0))/(image.h*image.h/4.0);
+              pixel.r = sqrt(r1*r1+r2*r2*fraction-r1*r1*fraction);
+              pixel.g = sqrt(g1*g1+g2*g2*fraction-g1*g1*fraction);
+              pixel.b = sqrt(b1*b1+b2*b2*fraction-b1*b1*fraction);
+              image.pixels[y * image.w + x] = pixel;
+            }
+          else {
+            double fraction = ((x-image.w/2.0)*(x-image.w/2.0)+(y-image.h/2.0)*(y-image.h/2.0))/(image.w*image.w/4.0);
             pixel.r = sqrt(r1*r1+r2*r2*fraction-r1*r1*fraction);
             pixel.g = sqrt(g1*g1+g2*g2*fraction-g1*g1*fraction);
             pixel.b = sqrt(b1*b1+b2*b2*fraction-b1*b1*fraction);
-            pixels[y * image_w + x] = pixel;
-         }
-         else {
-             double fraction = ((x-image_w/2.0)*(x-image_w/2.0)+(y-image_h/2.0)*(y-image_h/2.0))/(image_w*image_w/4.0);
-             pixel.r = sqrt(r1*r1+r2*r2*fraction-r1*r1*fraction);
-             pixel.g = sqrt(g1*g1+g2*g2*fraction-g1*g1*fraction);
-             pixel.b = sqrt(b1*b1+b2*b2*fraction-b1*b1*fraction);
-             pixels[y * image_w + x] = pixel;
-         }
+            image.pixels[y * image.w + x] = pixel;
+          }
         }
     }
+}
+
+
+static void
+draw_moving_tiles (Image image)
+{
+  static u32 x_offset = 0;
+  static u32 y_offset = 0;
+  V3 pixel = {};
+  for (u32 y = 0; y < image.h; ++y)
+    {
+      pixel.b = y + y_offset;
+      for (u32 x = 0; x < image.w; ++x)
+        {
+          pixel.g = x + x_offset;
+          image.pixels[image.w * y + x] = pixel;
+        }
+    }
+  ++x_offset;
+  ++y_offset;
 }

@@ -1,4 +1,4 @@
-/* BMP Drawing program
+/* Graphics drawing program
  *
  * Copyright (C) 2019 Martin & Diana
  *
@@ -16,73 +16,158 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define MAIN_WINDOW_INIT_WIDTH  400
+#define MAIN_WINDOW_INIT_HEIGHT 400
+
+#include <SDL.h>
+#include <GL/gl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#import "gradients.cpp"
+#include <assert.h>
+
+
+typedef float    r32;
+
+typedef uint32_t u32;
+typedef uint16_t u16;
+typedef uint8_t  u8;
+typedef int16_t s16;
 
 #pragma pack(push, 1)
-struct BMPHeader {
-  char magic_number[2];
-  u32  file_size;
-  u16  reserved1;
-  u16  reserved2;
-  u32  offset_bits;
+union V3 {
+  struct {u8 r, g, b;};
+  struct {u8 x, y, z;};
 };
 #pragma pack(pop)
 
-#pragma pack(push, 1)
-struct BMPImageHeader {
-  u32 header_size;
-  u32 width;
-  u32 height;
-  u16 planes;
-  u16 bit_count;
-  u32 compression;
-  u32 image_size;
-  u32 ppm_x;
-  u32 ppm_y;
-  u32 clr_used;
-  u32 clr_important;
-};
-#pragma pack(pop)
+
+#include "gradients.cpp"
+
+
+static void
+set_window_transform (int window_w, int window_h)
+{
+  r32 w = 2.0f / window_w;
+  r32 h = 2.0f / window_h;
+  r32 x = 0;
+  r32 y = 0;
+
+  r32 transform[] = {
+    w, 0, 0, 0,
+    0, h, 0, 0,
+    0, 0, 1, 0,
+    x, y, 0, 1,
+  };
+
+  glLoadMatrixf (transform);
+  glViewport (0, 0, window_w, window_h);
+}
+
+
+static void
+update_texture (GLuint texture, u32 image_w, u32 image_h, V3 *image)
+{
+  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB8,
+                image_w, image_h, 0,
+                GL_RGB, GL_UNSIGNED_BYTE,
+                image);
+}
+
+
+static void
+show_image (GLuint texture, u32 image_w, u32 image_h)
+{
+  int w = image_w / 2;
+  int h = image_h / 2;
+
+  glColor3f (1, 1, 1);
+
+  glBegin (GL_TRIANGLE_STRIP);
+  glTexCoord2f (1, 1);
+  glVertex2f ( w, -h);
+  glTexCoord2f (0, 1);
+  glVertex2f (-w, -h);
+  glTexCoord2f (1, 0);
+  glVertex2f ( w,  h);
+  glTexCoord2f (0, 0);
+  glVertex2f (-w,  h);
+  glEnd ();
+}
 
 
 int
 main()
 {
-  u32 width  = 800;
-  u32 height = 500;
-  u32 pixels_count = width * height;
-  u32 image_size = pixels_count * 3;
+  SDL_Init (SDL_INIT_VIDEO);
+  SDL_Window *main_window = SDL_CreateWindow ("Graphics", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MAIN_WINDOW_INIT_WIDTH, MAIN_WINDOW_INIT_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+  assert (main_window);
+  SDL_GLContext glcontext = SDL_GL_CreateContext (main_window);
+  assert (glcontext);
 
-  BMPHeader file_header = {{'B', 'M'}};
-  file_header.file_size = sizeof (BMPHeader) + sizeof (BMPImageHeader) + image_size;
+  u32 image_w = 400;
+  u32 image_h = 400;
+  V3 *image = (V3 *) malloc (sizeof (V3) * image_w * image_h);
 
-  BMPImageHeader image_header = {};
-  image_header.header_size = 40;
-  image_header.width      = width;
-  image_header.height     = height;
-  image_header.planes     = 1;
-  image_header.bit_count  = 24;
-  image_header.image_size = file_header.file_size;  // Shoudn't this be image_size?
-  u32 dpi = 96;
-  u32 ppm = dpi * 39.375;
-  image_header.ppm_x      = ppm;
-  image_header.ppm_y      = ppm;
+  GLuint texture;
+  glGenTextures (1, &texture);
+  glBindTexture (GL_TEXTURE_2D, texture);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  Pixel *pixels = (Pixel *) malloc (sizeof (Pixel) * pixels_count);
+  glEnable (GL_TEXTURE_2D);
+  glClearColor (0.20, 0.25, 0.30, 1.0);
 
-    FILE *image = fopen ("image.bmp", "wb");
-    fwrite (&file_header,  1, sizeof (BMPHeader), image);
-    fwrite (&image_header, 1, sizeof (BMPImageHeader), image);
+  for (int keep_running = 1; keep_running; )
+    {
+      for (SDL_Event event; SDL_PollEvent (&event);)
+        {
+          switch (event.type)
+            {
+            case SDL_WINDOWEVENT:
+              {
+                switch (event.window.event)
+                  {
+                  case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    int window_w = event.window.data1;
+                    int window_h = event.window.data2;
+                    set_window_transform (window_w, window_h);
+                    break;
+                  }
+              } break;
+            case SDL_QUIT:
+              {
+                keep_running = 0;
+                break;
+              }
+            }
+        }
 
-    radial_gradient_fill (pixels, width, height, 0x800000, 0x000080);
+      glClear (GL_COLOR_BUFFER_BIT);
 
-    fwrite (pixels, sizeof (Pixel), pixels_count, image);
-    fclose(image);
-    free (pixels);
+      // static u32 x_offset = 0;
+      // static u32 y_offset = 0;
+      // V3 pixel = {};
+      // for (u32 y = 0; y < image_h; ++y)
+      //   {
+      //     pixel.b = y + y_offset;
+      //     for (u32 x = 0; x < image_w; ++x)
+      //       {
+      //         pixel.g = x + x_offset;
+      //         image[image_w * y + x] = pixel;
+      //       }
+      //   }
+      // ++x_offset;
+      // ++y_offset;
+
+      radial_gradient_fill (image, image_w, image_h, 0x000000, 0x00FFFF);
+
+      update_texture (texture, image_w, image_h, image);
+      show_image     (texture, image_w, image_h);
+
+      SDL_GL_SwapWindow (main_window);
+    }
 
   return 0;
 }

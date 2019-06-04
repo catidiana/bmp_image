@@ -3,33 +3,24 @@
 #include <stdint.h>
 #include <math.h>
 
-typedef uint32_t u32;
-typedef uint16_t u16;
-typedef uint8_t  u8;
-typedef int16_t s16;
-#pragma pack(push, 1)
-struct Pixel {
-    u8 b, g, r;
-};
-#pragma pack(pop)
 //fill functions
 
 //put HEX color code like 0x000000
-void uniform_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color= 0xFFFFFF);
+void uniform_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color= 0xFFFFFF);
 //shift - number from 0 to 1 that shift gradient, making part of the file one color, squeezing gradient
-void linear_vertical_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000, float shift = 0);
-void linear_horizontal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000, float shift = 0);
-void diagonal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000);
-void radial_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000);
+void linear_vertical_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000, float shift = 0);
+void linear_horizontal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000, float shift = 0);
+void diagonal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000);
+void radial_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000);
 
 
-void uniform_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color)
+void uniform_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color)
 {
     u8 r = (hex_color & 0xff0000) >> 16;
     u8 g = (hex_color & 0x00ff00) >> 8;
     u8 b = (hex_color & 0x0000ff);
 
-    Pixel color = {b, g, r};
+    V3 color = {b, g, r};
 
     for (u32 y = 0; y < image_h; y++)
     {
@@ -40,7 +31,7 @@ void uniform_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color)
     }
 }
 
-void linear_vertical_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2, float shift)
+void linear_vertical_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2, float shift)
 {
     u8 r1 = (hex_color1 & 0xff0000) >> 16;
     u8 g1 = (hex_color1 & 0x00ff00) >> 8;
@@ -51,7 +42,7 @@ void linear_vertical_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32
 
     for (u32 y = 0; y < image_h; y++)
     {
-        Pixel pixel = {};
+        V3 pixel = {};
         if (y<image_h*shift)
         {
             pixel.r = r1;
@@ -70,7 +61,7 @@ void linear_vertical_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32
     }
 }
 
-void linear_horizontal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2, float shift)
+void linear_horizontal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2, float shift)
 {
     u8 r1 = (hex_color1 & 0xff0000) >> 16;
     u8 g1 = (hex_color1 & 0x00ff00) >> 8;
@@ -82,7 +73,7 @@ void linear_horizontal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u
     for (u32 x = 0; x < image_w; x++)
     {
 
-        Pixel pixel = {};
+        V3 pixel = {};
         if (x<image_w*shift)
         {
             pixel.r = r1;
@@ -101,7 +92,7 @@ void linear_horizontal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u
     }
 }
 
-void diagonal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2)
+void diagonal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2)
 {
     u8 r1 = (hex_color1 & 0xff0000) >> 16;
     u8 g1 = (hex_color1 & 0x00ff00) >> 8;
@@ -112,7 +103,7 @@ void diagonal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_co
 
     for (u32 y = 0; y < image_h; y++)
     {
-        Pixel pixel = {};
+        V3 pixel = {};
         for (u32 x = 0; x < image_w; x++)
         {
             pixel.r = r1 +r2*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h)-r1*(x*image_w+y*image_h)/(image_w*image_w+image_h*image_h);
@@ -124,7 +115,7 @@ void diagonal_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_co
     }
 }
 
-void radial_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2)
+void radial_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2)
 {
     u8 r1 = (hex_color1 & 0xff0000) >> 16;
     u8 g1 = (hex_color1 & 0x00ff00) >> 8;
@@ -135,7 +126,7 @@ void radial_gradient_fill (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_colo
 
     for (u32 y = 0; y < image_h; y++)
     {
-        Pixel pixel = {};
+        V3 pixel = {};
         for (u32 x = 0; x < image_w; x++)
         {
          if(image_h<=image_w)

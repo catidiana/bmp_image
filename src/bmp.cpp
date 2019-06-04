@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#import "gradients.cpp"
+#include "gradients.cpp"
 
 #pragma pack(push, 1)
 struct BMPHeader {

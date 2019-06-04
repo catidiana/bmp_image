@@ -20,18 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-
-typedef uint32_t u32;
-typedef uint16_t u16;
-typedef uint8_t  u8;
-
-
-#pragma pack(push, 1)
-struct Pixel {
-  u8 b, g, r;
-};
-#pragma pack(pop)
-
+#import "gradients.cpp"
 
 #pragma pack(push, 1)
 struct BMPHeader {
@@ -63,8 +52,8 @@ struct BMPImageHeader {
 int
 main()
 {
-  u32 width  = 400;
-  u32 height = 400;
+  u32 width  = 800;
+  u32 height = 500;
   u32 pixels_count = width * height;
   u32 image_size = pixels_count * 3;
 
@@ -85,24 +74,15 @@ main()
 
   Pixel *pixels = (Pixel *) malloc (sizeof (Pixel) * pixels_count);
 
-  for (u32 y = 0; y < height; y++)
-    {
-      for (u32 x = 0; x < width; x++)
-        {
-          Pixel pixel = {};
-          pixel.r = 0;
-          pixel.g = 256 * y / height;
-          pixel.b = 256 * x / width;
+    FILE *image = fopen ("image.bmp", "wb");
+    fwrite (&file_header,  1, sizeof (BMPHeader), image);
+    fwrite (&image_header, 1, sizeof (BMPImageHeader), image);
 
-          pixels[y * width + x] = pixel;
-        }
-    }
+    radial_gradient_fill (pixels, width, height, 0x800000, 0x000080);
 
-  FILE *image = fopen ("image.bmp", "wb");
-  fwrite (&file_header,  1, sizeof (BMPHeader), image);
-  fwrite (&image_header, 1, sizeof (BMPImageHeader), image);
-  fwrite (pixels, sizeof (Pixel), pixels_count, image);
-  fclose(image);
+    fwrite (pixels, sizeof (Pixel), pixels_count, image);
+    fclose(image);
+    free (pixels);
 
   return 0;
 }

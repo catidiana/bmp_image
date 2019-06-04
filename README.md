@@ -1,1 +1,1 @@
-# bmp_image Program to create and draw
+# A program to create and draw graphics

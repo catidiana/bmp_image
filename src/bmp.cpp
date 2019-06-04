@@ -20,7 +20,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
+
+typedef uint32_t u32;
+typedef uint16_t u16;
+typedef uint8_t  u8;
+typedef int16_t s16;
+#pragma pack(push, 1)
+struct Pixel {
+    u8 b, g, r;
+};
+#pragma pack(pop)
+
 #include "gradients.cpp"
+#include "figures.cpp"
 
 #pragma pack(push, 1)
 struct BMPHeader {

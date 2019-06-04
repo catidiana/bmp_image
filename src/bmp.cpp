@@ -34,6 +34,7 @@ struct Pixel {
 
 #include "gradients.cpp"
 #include "figures.cpp"
+#include "lines.cpp"
 
 #pragma pack(push, 1)
 struct BMPHeader {

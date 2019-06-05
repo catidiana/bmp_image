@@ -95,7 +95,7 @@ void draw_Mandelbrot_convergence (Pixel *pixels, u32 image_w, u32 image_h, u32 h
                 if (cor_x>2 || cor_x<-2|| cor_y>2 || cor_y<-2)
                 {   pixel.r = r1+max_step*(r2-r1)/(steps+2);
                     pixel.g = g1+max_step*(g2-g1)/(steps+2);
-                    pixel.b = b1+100*(b2-b1)/(steps+2);
+                    pixel.b = b1+max_step*(b2-b1)/(steps+2);
                     pixels[(y+shift_y) * image_wid + x+shift_x] = pixel;
                     break;}
                 

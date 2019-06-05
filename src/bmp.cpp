@@ -146,7 +146,7 @@ show_image (Image image)
 
 
 int
-main()
+main (int argc, char **argv)
 {
   SDL_Init (SDL_INIT_VIDEO);
   SDL_Window *main_window = SDL_CreateWindow ("Graphics", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MAIN_WINDOW_INIT_WIDTH, MAIN_WINDOW_INIT_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);

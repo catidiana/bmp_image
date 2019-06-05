@@ -203,7 +203,7 @@ main()
       draw_gradient_tiles    (images[3], -x,  x);
 
       uniform_fill    (images[4], 0x771111);
-      draw_mandelbrot (images[4], 0xffaa00, 0.38, 240, 150, x / 2 % 50);
+      draw_mandelbrot_convergence(images[4], 0xffaa00,0x1730e5, 4, -300, -300, x / 2 % 200);
 
       draw_gradient_tiles (images[5], -x, -x);
 

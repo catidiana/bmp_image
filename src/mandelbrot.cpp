@@ -36,25 +36,26 @@ void draw_Mandelbrot (Pixel *pixels, u32 image_w, u32 image_h, u32 hex_color, fl
     {
         for (s32 x = -shift_x; x < image_wid-shift_x; x++)
         {
-            float cor_x = 0.0;
-            float cor_y = 0.0;
-            float x_c = (float)x/(image_wid*scale);
-            float y_c = (float)y/(image_hei*scale);
+            double cor_x = 0.0;
+            double cor_y = 0.0;
+            double x_c = (double)x/(image_wid*scale);
+            double y_c = (double)y/(image_hei*scale);
             u32 steps = 0;
-
+            
             while (1) {
-                float x_test = cor_x;
-                float y_test = cor_y;
+                double x_test = cor_x;
+                double y_test = cor_y;
                 cor_x = x_test*x_test - y_test*y_test + x_c;
                 cor_y = 2*x_test*y_test + y_c;
                 if (cor_x>2 || cor_x<-2|| cor_y>2 || cor_y<-2)
                 {break;}
-                steps++;
-                if (steps>20)
+                
+                if ((steps>=1 && cor_x-x_test==0.0 && cor_y-y_test==0.0) || steps>100)
                 {
                     pixels[(y+shift_y) * image_wid + x+shift_x] = color;
                     break;
                 }
+                steps++;
             }
         }
     }

@@ -169,19 +169,29 @@ main()
   glEnable (GL_TEXTURE_2D);
   glClearColor (0.20, 0.25, 0.30, 1.0);
 
+  int window_w = MAIN_WINDOW_INIT_WIDTH;
+  int window_h = MAIN_WINDOW_INIT_WIDTH;
+  int mouse_x = 0;
+  int mouse_y = 0;
+
   for (int keep_running = 1; keep_running; )
     {
       for (SDL_Event event; SDL_PollEvent (&event);)
         {
           switch (event.type)
             {
+            case SDL_MOUSEMOTION:
+              {
+                mouse_x = event.motion.x;
+                mouse_y = event.motion.y;
+              } break;
             case SDL_WINDOWEVENT:
               {
                 switch (event.window.event)
                   {
                   case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    int window_w = event.window.data1;
-                    int window_h = event.window.data2;
+                    window_w = event.window.data1;
+                    window_h = event.window.data2;
                     set_window_transform (window_w, window_h);
                     break;
                   }
@@ -197,13 +207,13 @@ main()
       glClear (GL_COLOR_BUFFER_BIT);
 
       static int x = 0;
-      draw_gradient_tiles    (images[0], x, x);
+      draw_gradient_tiles    (images[0], -mouse_x, mouse_y);
       radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
       diagonal_gradient_fill (images[2], 0x0000FF + x, 0x00FFFF - x);
       draw_gradient_tiles    (images[3], -x,  x);
 
       uniform_fill    (images[4], 0x771111);
-      draw_mandelbrot_convergence(images[4], 0xffaa00,0x1730e5, 0.38, 240, 150, x / 2 % 200);
+      draw_mandelbrot_convergence (images[4], 0xffaa00, 0x1730e5, 0.38, 240 + mouse_x, 150 - mouse_y, x / 2 % 20);
 
       draw_gradient_tiles (images[5], -x, -x);
 

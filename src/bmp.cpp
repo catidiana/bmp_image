@@ -65,6 +65,7 @@ to_color (u32 hex_color)
 
 #include "gradients.cpp"
 #include "mandelbrot.cpp"
+#include "figures.cpp"
 
 
 static void
@@ -208,10 +209,14 @@ main (int argc, char **argv)
 
       static int x = 0;
       draw_gradient_tiles    (images[0], -mouse_x, mouse_y);
+      draw_rectangular (images[0], 50, 50 + x % 100, x % 100, 40 + x % 100, 0xdb2323);
       radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
+      draw_circle (images[1], 20 + x % 100, 200, 200, 0x000000 + x);
       diagonal_gradient_fill (images[2], 0x0000FF + x, 0x00FFFF - x);
+      draw_equilateral_triangle (images[2], 70, 20 + x % 100, 50 + x % 100, 0xff0000 - x);
       draw_gradient_tiles    (images[3], -x,  x);
-
+      draw_ellipse (images[3], 10 + x % 100, 50+2 * x % 100, 250, 300, 0xdb2323);
+      
       uniform_fill    (images[4], 0x771111);
       draw_mandelbrot_convergence (images[4], 0xffaa00, 0x1730e5, 0.38,
                                    240 + mouse_x - window_w / 2,

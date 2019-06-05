@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define MAIN_WINDOW_INIT_WIDTH  400
-#define MAIN_WINDOW_INIT_HEIGHT 400
+#define MAIN_WINDOW_INIT_WIDTH  900
+#define MAIN_WINDOW_INIT_HEIGHT 600
 
 #include <SDL.h>
 #include <GL/gl.h>
@@ -26,13 +26,15 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
-
+#include <math.h>
 
 typedef float    r32;
+typedef double   r64;
 
 typedef uint32_t u32;
 typedef uint16_t u16;
 typedef uint8_t  u8;
+typedef int16_t s32;
 typedef int16_t s16;
 
 
@@ -52,7 +54,17 @@ struct Image {
 };
 
 
+static V3
+to_color (u32 hex_color)
+{
+  u8 r = (hex_color & 0xff0000) >> 16;
+  u8 g = (hex_color & 0x00ff00) >> 8;
+  u8 b = (hex_color & 0x0000ff);
+  return {r, g, b};
+}
+
 #include "gradients.cpp"
+#include "mandelbrot.cpp"
 
 
 static void
@@ -120,14 +132,14 @@ show_image (Image image)
 
   glBegin (GL_TRIANGLE_STRIP);
 
-  glTexCoord2f (1, 1);
-  glVertex2f (x1, y0);
-  glTexCoord2f (0, 1);
+  glTexCoord2f (0, 0);
   glVertex2f (x0, y0);
   glTexCoord2f (1, 0);
-  glVertex2f (x1, y1);
-  glTexCoord2f (0, 0);
+  glVertex2f (x1, y0);
+  glTexCoord2f (0, 1);
   glVertex2f (x0, y1);
+  glTexCoord2f (1, 1);
+  glVertex2f (x1, y1);
 
   glEnd ();
 }
@@ -188,8 +200,11 @@ main()
       draw_gradient_tiles    (images[0], x, x);
       radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
       diagonal_gradient_fill (images[2], 0x0000FF, 0x00FFFF);
-      draw_gradient_tiles (images[3], -x,  x);
-      draw_gradient_tiles (images[4],  x, -x);
+      draw_gradient_tiles    (images[3], -x,  x);
+
+      uniform_fill    (images[4], 0x771111);
+      draw_mandelbrot (images[4], 0xffaa00, 0.38, 240, 150, x / 2 % 50);
+
       draw_gradient_tiles (images[5], -x, -x);
 
       ++x;

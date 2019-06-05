@@ -1,36 +1,37 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <math.h>
+/* Graphics drawing program
+ *
+ * Copyright (C) 2019 Martin & Diana
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-//fill functions
 
-//put HEX color code like 0x000000
-void uniform_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color= 0xFFFFFF);
-//shift - number from 0 to 1 that shift gradient, making part of the file one color, squeezing gradient
-void linear_vertical_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000, float shift = 0);
-void linear_horizontal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000, float shift = 0);
-void diagonal_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000);
-void radial_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1 = 0xFFFFFF, u32 hex_color2 = 0x000000);
-
-
-void uniform_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color)
+static void
+uniform_fill (Image image, u32 hex_color)
 {
-    u8 r = (hex_color & 0xff0000) >> 16;
-    u8 g = (hex_color & 0x00ff00) >> 8;
-    u8 b = (hex_color & 0x0000ff);
+  V3 color = to_color (hex_color);
 
-    V3 color = {b, g, r};
-
-    for (u32 y = 0; y < image_h; y++)
+  for (u32 y = 0; y < image.h; y++)
     {
-        for (u32 x = 0; x < image_w; x++)
+      for (u32 x = 0; x < image.w; x++)
         {
-            pixels[y * image_w + x] = color;
+          image.pixels[y * image.w + x] = color;
         }
     }
 }
 
+//shift - number from 0 to 1 that shift gradient, making part of the file one color, squeezing gradient
 void linear_vertical_gradient_fill (V3 *pixels, u32 image_w, u32 image_h, u32 hex_color1, u32 hex_color2, float shift)
 {
     u8 r1 = (hex_color1 & 0xff0000) >> 16;
@@ -121,12 +122,14 @@ diagonal_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
 static void
 radial_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
 {
-  u8 r1 = (hex_color1 & 0xff0000) >> 16;
-  u8 g1 = (hex_color1 & 0x00ff00) >> 8;
-  u8 b1 = (hex_color1 & 0x0000ff);
-  u8 r2 = (hex_color2 & 0xff0000) >> 16;
-  u8 g2 = (hex_color2 & 0x00ff00) >> 8;
-  u8 b2 = (hex_color2 & 0x0000ff);
+  V3 c1 = to_color (hex_color1);
+  V3 c2 = to_color (hex_color2);
+  u8 r1 = c1.r;
+  u8 g1 = c1.g;
+  u8 b1 = c1.b;
+  u8 r2 = c2.r;
+  u8 g2 = c2.g;
+  u8 b2 = c2.b;
 
   for (u32 y = 0; y < image.h; y++)
     {

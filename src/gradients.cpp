@@ -122,6 +122,7 @@ diagonal_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
 static void
 radial_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
 {
+  uniform_fill (image, hex_color2);
   V3 c1 = to_color (hex_color1);
   V3 c2 = to_color (hex_color2);
   u8 r1 = c1.r;
@@ -130,30 +131,26 @@ radial_gradient_fill (Image image, u32 hex_color1, u32 hex_color2)
   u8 r2 = c2.r;
   u8 g2 = c2.g;
   u8 b2 = c2.b;
+  u32 radius = image.w;
+  if (image.w > image.h) radius = image.h;
 
   for (u32 y = 0; y < image.h; y++)
     {
       V3 pixel = {};
       for (u32 x = 0; x < image.w; x++)
         {
-          if(image.h <= image.w)
+          if((2*x-radius)*(2*x-radius)+(2*y-radius)*(2*y-radius)      <=radius*radius)
             {
-              double fraction = ((x-image.w/2.0)*(x-image.w/2.0)+(y-image.h/2.0)*(y-image.h/2.0))/(image.h*image.h/4.0);
+              double fraction = ((x-image.w/2.0)*(x-image.w/2.0)+(y-image.h/2.0)*(y-image.h/2.0))/(radius*radius/4.0);
               pixel.r = sqrt(r1*r1+r2*r2*fraction-r1*r1*fraction);
               pixel.g = sqrt(g1*g1+g2*g2*fraction-g1*g1*fraction);
               pixel.b = sqrt(b1*b1+b2*b2*fraction-b1*b1*fraction);
               image.pixels[y * image.w + x] = pixel;
             }
-          else {
-            double fraction = ((x-image.w/2.0)*(x-image.w/2.0)+(y-image.h/2.0)*(y-image.h/2.0))/(image.w*image.w/4.0);
-            pixel.r = sqrt(r1*r1+r2*r2*fraction-r1*r1*fraction);
-            pixel.g = sqrt(g1*g1+g2*g2*fraction-g1*g1*fraction);
-            pixel.b = sqrt(b1*b1+b2*b2*fraction-b1*b1*fraction);
-            image.pixels[y * image.w + x] = pixel;
-          }
         }
     }
 }
+
 
 
 static void

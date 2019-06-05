@@ -199,7 +199,7 @@ main()
       static int x = 0;
       draw_gradient_tiles    (images[0], x, x);
       radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
-      diagonal_gradient_fill (images[2], 0x0000FF, 0x00FFFF);
+      diagonal_gradient_fill (images[2], 0x0000FF + x, 0x00FFFF - x);
       draw_gradient_tiles    (images[3], -x,  x);
 
       uniform_fill    (images[4], 0x771111);

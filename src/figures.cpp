@@ -37,6 +37,12 @@ draw_square (Image image, u32 square_w, u32 corner_x = 0, u32 corner_y = 0, u32 
 }
 
 
+// TODO(Martin): Should be draw_rect or draw_rectangle.
+// TODO(Martin): Position coordinates should be before dimensions.
+// TODO(Martin): Rectangle of w/h of 1 should be one pixel wide/tall, not 2.
+// TODO(Martin): Maybe position s32, not u32, so we can draw partial rectangles too.
+// TODO(Martin): Maybe the rectangle should be drawn centered to x and y, or there should be another function for that.
+// TODO(Martin): The function should be made much more optimized, as in, it can do it's work in much less cycles; right now it's pretty slow.
 static void
 draw_rectangular (Image image, u32 square_w, u32 square_h, u32 corner_x = 0, u32 corner_y = 0, u32 hex_color = 0x000000)
 {

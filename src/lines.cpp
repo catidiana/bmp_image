@@ -96,8 +96,10 @@ draw_angle_line (Image image, u32 angle = 45, u32 hex_color = 0x000000, u32 corn
     }
 }
 
-
 //build smooth path based on segment P0(x,y) - P1(x,y)
+// TODO(Martin): Positions should be s32, otherwise we can't draw stuff to the left and botttom of the image.
+// TODO(Martin): Probably can be very optimized by a simple line function.
+// TODO(Martin): Also, it looks jaggidy, not only because of no anti-aliasing.
 static void
 linear_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32 hex_color = 0x000000)
 {
@@ -120,6 +122,7 @@ linear_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32 he
 
 
 //build smooth path based on segments P0(x,y) - P1(x,y) - P2(x,y)
+// TODO(Martin): Positions should be s32, otherwise we can't draw stuff to the left and botttom of the image.
 static void
 quadratic_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32 P2_x, u32 P2_y, u32 hex_color = 0x000000)
 {
@@ -144,6 +147,7 @@ quadratic_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32
 
 
 //build smooth path based on segments P0(x,y) - P1(x,y) - P2(x,y) - P3 (x,y)
+// TODO(Martin): Positions should be s32, otherwise we can't draw stuff to the left and botttom of the image.
 static void
 cubic_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32 P2_x, u32 P2_y, u32 P3_x, u32 P3_y, u32 hex_color = 0x000000)
 {
@@ -166,7 +170,3 @@ cubic_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32 P2_
     }
 
 }
-
-
-
-

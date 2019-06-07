@@ -39,12 +39,14 @@ typedef int16_t s32;
 typedef int16_t s16;
 
 
-#pragma pack(push, 1)
+struct V2 {
+  r32 x, y;
+};
+
 union V3 {
   struct {u8 r, g, b;};
   struct {u8 x, y, z;};
 };
-#pragma pack(pop)
 
 
 struct Image {
@@ -159,6 +161,10 @@ main (int argc, char **argv)
 
   set_window_transform (MAIN_WINDOW_INIT_WIDTH, MAIN_WINDOW_INIT_HEIGHT);
 
+  size_t points_max = 1024;
+  size_t points_count = 0;
+  V2    *points = (V2 *) malloc (points_max * sizeof (*points));
+
   u32   images_count = 6;
   Image images[6] = {
     new_image (300, 300, -300,  150),
@@ -174,8 +180,10 @@ main (int argc, char **argv)
 
   int window_w = MAIN_WINDOW_INIT_WIDTH;
   int window_h = MAIN_WINDOW_INIT_WIDTH;
-  int mouse_x = 0;
-  int mouse_y = 0;
+  int mouse_screen_x = 0;
+  int mouse_screen_y = 0;
+  int mouse_pressed = 0;
+  V2  mouse_pos = {};
 
   for (int keep_running = 1; keep_running; )
     {
@@ -185,8 +193,18 @@ main (int argc, char **argv)
             {
             case SDL_MOUSEMOTION:
               {
-                mouse_x = event.motion.x;
-                mouse_y = event.motion.y;
+                mouse_screen_x = event.motion.x;
+                mouse_screen_y = event.motion.y;
+                mouse_pos.x =            (mouse_screen_x - window_w / 2);
+                mouse_pos.y = window_h - (mouse_screen_y + window_h / 2);
+              } break;
+            case SDL_MOUSEBUTTONDOWN:
+              {
+                if (event.button.button == SDL_BUTTON_LEFT) mouse_pressed = 1;
+              } break;
+            case SDL_MOUSEBUTTONUP:
+              {
+                if (event.button.button == SDL_BUTTON_LEFT) mouse_pressed = 0;
               } break;
             case SDL_WINDOWEVENT:
               {
@@ -207,25 +225,66 @@ main (int argc, char **argv)
             }
         }
 
+      if (mouse_pressed)
+        {
+          mouse_pressed = 0;
+          V2 point;
+          point.x = mouse_pos.x - images[2].x + images[2].w / 2;
+          point.y = mouse_pos.y - images[2].y + images[2].h / 2;
+          points[points_count++] = point;
+        }
+
       glClear (GL_COLOR_BUFFER_BIT);
 
       static int x = 0;
-      draw_gradient_tiles    (images[0], -mouse_x, mouse_y);
+      draw_gradient_tiles    (images[0], -mouse_screen_x, mouse_screen_y);
       draw_rectangular (images[0], 50, 50 + x % 100, x % 100, 40 + x % 100, 0xff0000 - x);
       draw_vertical_line (images[0], x%200, 0xff8f43, 10);
       draw_vertical_line (images[0], 30+x%170, 0x43bcff, 10);
       radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
       draw_circle (images[1], 20 + x % 100, 200, 200, 0xff0000 - x);
-      diagonal_gradient_fill (images[2], 0x0000FF + x, 0x00FFFF - x);
+
+      diagonal_gradient_fill    (images[2], 0x0000FF + x, 0x00FFFF - x);
       draw_equilateral_triangle (images[2], 70, 20 + x % 100, 50 + x % 100, 0xff0000 - x);
+
+      for (size_t i = 0; i < points_count; ++i)
+        {
+          V2 point = points[i];
+          draw_rectangular (images[2], 3, 3, point.x, point.y, 0xffffff);
+        }
+
+      for (size_t i = 1; i < points_count; ++i)
+        {
+          V2 p0 = points[i-1];
+          V2 p1 = points[i];
+          linear_bezier_curve (images[2], p0.x, p0.y, p1.x, p1.y, 0xffffff);
+        }
+
+      for (size_t i = 2; i < points_count; i+=2)
+        {
+          V2 p0 = points[i-2];
+          V2 p1 = points[i-1];
+          V2 p2 = points[i];
+          quadratic_bezier_curve (images[2], p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, 0xffffff);
+        }
+
+      for (size_t i = 3; i < points_count; i+=3)
+        {
+          V2 p0 = points[i-3];
+          V2 p1 = points[i-2];
+          V2 p2 = points[i-1];
+          V2 p3 = points[i];
+          cubic_bezier_curve (images[2], p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, 0xffffff);
+        }
+
       draw_gradient_tiles    (images[3], -x,  x);
       draw_ellipse (images[3], 10 + x % 100, 50+2 * x % 100, 150, 100, 0xff0000 - x);
       draw_angle_line (images[3], x, 0xff8f43, 150, 150, 15);
-      
+
       uniform_fill    (images[4], 0x771111);
       draw_mandelbrot_convergence (images[4], 0xffaa00, 0x1730e5, 0.5,
-                                   240 + mouse_x - window_w / 2,
-                                   150 - mouse_y + window_h / 2,
+                                   240 + mouse_screen_x - window_w / 2,
+                                   150 - mouse_screen_y + window_h / 2,
                                    x / 2 % 20);
 
       draw_gradient_tiles (images[5], -x, -x);
@@ -239,6 +298,12 @@ main (int argc, char **argv)
           update_image_texture (images[i]);
           show_image           (images[i]);
         }
+
+      // glBegin (GL_TRIANGLES);
+      // glVertex2f (mouse_pos.x     , mouse_pos.y);
+      // glVertex2f (mouse_pos.x + 10, mouse_pos.y);
+      // glVertex2f (mouse_pos.x + 10, mouse_pos.y - 10);
+      // glEnd ();
 
       SDL_GL_SwapWindow (main_window);
     }

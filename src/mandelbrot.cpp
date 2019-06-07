@@ -89,9 +89,10 @@ draw_mandelbrot_convergence (Image image, u32 hex_color1, u32 hex_color2, r32 sc
 
                 if (cor_x*cor_x+cor_y*cor_y > (image_h*image_h+image_w*image_w)/(scale*scale)) 
                 {
-                    pixel.r = r1+max_steps*(r2-r1)/(steps+2);
-                    pixel.g = g1+max_steps*(g2-g1)/(steps+2);
-                    pixel.b = b1+max_steps*(b2-b1)/(steps+2);
+                    r64 t = (r64)steps/max_steps;
+                    pixel.r = (1-t)*r2;
+                    pixel.g = (1-t)*g2;
+                    pixel.b = (1-t)*b2;
                     image.pixels[(y + shift_y) * image.w + x + shift_x] = pixel;
                     break;
                 }

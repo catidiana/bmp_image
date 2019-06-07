@@ -18,6 +18,7 @@
 
 #define MAIN_WINDOW_INIT_WIDTH  900
 #define MAIN_WINDOW_INIT_HEIGHT 600
+#define M_PI 3.14159265358979323846
 
 #include <SDL.h>
 #include <GL/gl.h>
@@ -66,6 +67,7 @@ to_color (u32 hex_color)
 #include "gradients.cpp"
 #include "mandelbrot.cpp"
 #include "figures.cpp"
+#include "lines.cpp"
 
 
 static void
@@ -209,21 +211,26 @@ main (int argc, char **argv)
 
       static int x = 0;
       draw_gradient_tiles    (images[0], -mouse_x, mouse_y);
-      draw_rectangular (images[0], 50, 50 + x % 100, x % 100, 40 + x % 100, 0xdb2323);
+      draw_rectangular (images[0], 50, 50 + x % 100, x % 100, 40 + x % 100, 0xff0000 - x);
+      draw_vertical_line (images[0], x%200, 0xff8f43, 10);
+      draw_vertical_line (images[0], 30+x%170, 0x43bcff, 10);
       radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
-      draw_circle (images[1], 20 + x % 100, 200, 200, 0x000000 + x);
+      draw_circle (images[1], 20 + x % 100, 200, 200, 0xff0000 - x);
       diagonal_gradient_fill (images[2], 0x0000FF + x, 0x00FFFF - x);
       draw_equilateral_triangle (images[2], 70, 20 + x % 100, 50 + x % 100, 0xff0000 - x);
       draw_gradient_tiles    (images[3], -x,  x);
-      draw_ellipse (images[3], 10 + x % 100, 50+2 * x % 100, 250, 300, 0xdb2323);
+      draw_ellipse (images[3], 10 + x % 100, 50+2 * x % 100, 150, 100, 0xff0000 - x);
+      draw_angle_line (images[3], x, 0xff8f43, 150, 150, 15);
       
       uniform_fill    (images[4], 0x771111);
-      draw_mandelbrot_convergence (images[4], 0xffaa00, 0x1730e5, 0.38,
+      draw_mandelbrot_convergence (images[4], 0xffaa00, 0x1730e5, 0.5,
                                    240 + mouse_x - window_w / 2,
                                    150 - mouse_y + window_h / 2,
                                    x / 2 % 20);
 
       draw_gradient_tiles (images[5], -x, -x);
+      quadratic_bezier_curve (images[5], x % 100, x % 100, 20 + (x % 100) *2, 30 + x % 100, 300 - x % 100, 300 - (x % 100) * 2, 0xff8f43);
+      cubic_bezier_curve (images[5], 2 * (x % 100), 300 - x % 100, 30 + x % 100, 250 - 2 * (x % 100), 100 + (x % 100) /2 , 150 - (x % 100),  300, 20, 0x43bcff);
 
       ++x;
 

@@ -20,43 +20,63 @@
 
 
 
-// corner_x corner_y - coordinates of bottom left corner
 static void
-draw_square (Image image, u32 square_w, u32 corner_x = 0, u32 corner_y = 0, u32 hex_color = 0x000000)
+draw_square (Image image, s32 center_x, s32 center_y, u32 square_w, u32 hex_color = 0x000000)
 {
     V3 color = to_color (hex_color);
+
+    s32 start_x = center_x - square_w/2;
+    s32 finish_x = center_x + square_w/2 + square_w%2;
+    if (start_x < 0) start_x = 0;
+    if (start_x > image.w) return;
+    if (finish_x < 0) return;
+    if (finish_x > image.w) finish_x = image.w;
+
+    s32 start_y = center_y - square_w/2;
+    s32 finish_y = center_y + square_w/2 + square_w%2;
+    if (start_y < 0) start_y = 0;
+    if (start_y > image.h) return;
+    if (finish_y < 0) return;
+    if (finish_y > image.h) finish_y = image.h;
     
-    for (u32 y = 0; y < image.h; y++)
+    for (u32 y = start_y; y < finish_y; y++)
     {
-        for (u32 x = 0; x < image.w; x++)
+        for (u32 x = start_x; x < finish_x; x++)
         {
-            if ((x>=corner_x && x<=corner_x+square_w) && (y>=corner_y && y<=corner_y+square_w))
-                image.pixels[y * image.w + x] = color;
+            image.pixels[y * image.w + x] = color;
         }
     }
 }
 
 
-// TODO(Martin): Should be draw_rect or draw_rectangle.
-// TODO(Martin): Position coordinates should be before dimensions.
-// TODO(Martin): Rectangle of w/h of 1 should be one pixel wide/tall, not 2.
-// TODO(Martin): Maybe position s32, not u32, so we can draw partial rectangles too.
-// TODO(Martin): Maybe the rectangle should be drawn centered to x and y, or there should be another function for that.
-// TODO(Martin): The function should be made much more optimized, as in, it can do it's work in much less cycles; right now it's pretty slow.
 static void
-draw_rectangular (Image image, u32 square_w, u32 square_h, u32 corner_x = 0, u32 corner_y = 0, u32 hex_color = 0x000000)
+draw_rectangle (Image image, s32 center_x, s32 center_y, u32 rect_w, u32 rect_h, u32 hex_color = 0x000000)
 {
     V3 color = to_color (hex_color);
     
-    for (u32 y = 0; y < image.h; y++)
+    s32 start_x = center_x - rect_w/2;
+    s32 finish_x = center_x + rect_w/2 + rect_w%2;
+    if (start_x < 0) start_x = 0;
+    if (start_x > image.w) return;
+    if (finish_x < 0) return;
+    if (finish_x > image.w) finish_x = image.w;
+
+    s32 start_y = center_y - rect_h/2;
+    s32 finish_y = center_y + rect_h/2 + rect_h%2;
+    if (start_y < 0) start_y = 0;
+    if (start_y > image.h) return;
+    if (finish_y < 0) return;
+    if (finish_y > image.h) finish_y = image.h;
+
+    for (u32 y = start_y; y < finish_y; y++)
     {
-        for (u32 x = 0; x < image.w; x++)
+        for (u32 x = start_x; x < finish_x; x++)
         {
-            if ((x>=corner_x && x<=corner_x+square_w) && (y>=corner_y && y<=corner_y+square_h))
-                image.pixels[y * image.w + x] = color;
+            image.pixels[y * image.w + x] = color;
         }
     }
 }
+
 
 
 static void

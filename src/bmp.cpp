@@ -238,7 +238,7 @@ main (int argc, char **argv)
 
       static int x = 0;
       draw_gradient_tiles    (images[0], -mouse_screen_x, mouse_screen_y);
-      draw_rectangular (images[0], 50, 50 + x % 100, x % 100, 40 + x % 100, 0xff0000 - x);
+      draw_rectangle (images[0], 50, 50 + x % 100, x % 100, 40 + x % 100, 0xff0000 - x);
       draw_vertical_line (images[0], x%200, 0xff8f43, 10);
       draw_vertical_line (images[0], 30+x%170, 0x43bcff, 10);
       radial_gradient_fill   (images[1], 0x000000 + x, 0x00FFFF);
@@ -250,7 +250,7 @@ main (int argc, char **argv)
       for (size_t i = 0; i < points_count; ++i)
         {
           V2 point = points[i];
-          draw_rectangular (images[2], 3, 3, point.x, point.y, 0xffffff);
+          draw_rectangle (images[2], 3, 3, point.x, point.y, 0xffffff);
         }
 
       for (size_t i = 1; i < points_count; ++i)

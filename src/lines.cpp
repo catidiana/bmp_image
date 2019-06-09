@@ -76,23 +76,42 @@ draw_angle_line (Image image, u32 angle = 45, u32 hex_color = 0x000000, u32 corn
         draw_horizontal_line (image, corner_y, hex_color, line_width);
         return;
     }
-    if (angle==90)
+    else if (angle==90)
     {
         draw_vertical_line (image, corner_x, hex_color, line_width);
         return;
     }
-
-    double alfa = tan(angle*M_PI/180.0);
-
-
-    for (u32 x = 0; x < image.w; x++)
+    else if (angle<=45 || angle >=135)
     {
+        double alfa = tan(angle*M_PI/180.0);
+        line_width = line_width/abs(cos(angle*M_PI/180.0));
+        for (u32 x = 0; x < image.w; x++)
+        {
+            s32 y_start = corner_y + alfa*x - alfa*corner_x - line_width/2;
+            s32 y_finish = corner_y + alfa*x - alfa*corner_x + line_width/2 +line_width%2;
+                    for (s32 y = y_start; y < y_finish; y++)
+            {
+                if(y >= 0 && y< image.h)
+
+                    image.pixels[y * image.w + x] = color;
+            }
+        }
+    }
+    else {
+        double alfa = 1/tan(angle*M_PI/180.0);
+        line_width = line_width/sin(angle*M_PI/180.0);
         for (u32 y = 0; y < image.h; y++)
         {
-            if(y >= corner_y + alfa*x - alfa*corner_x - line_width/2 && y<corner_y + alfa*x - alfa*corner_x + line_width/2 +line_width%2)
+            s32 x_start = corner_x + alfa*y - alfa*corner_y - line_width/2;
+            s32 x_finish = corner_x + alfa*y - alfa*corner_y + line_width/2 +line_width%2;
+                    for (s32 x = x_start; x < x_finish; x++)
+            {
+                if(x >= 0 && x < image.w)
 
-                image.pixels[y * image.w + x] = color;
+                    image.pixels[y * image.w + x] = color;
+            }
         }
+
     }
 }
 

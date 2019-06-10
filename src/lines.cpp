@@ -115,26 +115,74 @@ draw_angle_line (Image image, u32 angle = 45, u32 hex_color = 0x000000, u32 corn
     }
 }
 
-//build smooth path based on segment P0(x,y) - P1(x,y)
-// TODO(Martin): Positions should be s32, otherwise we can't draw stuff to the left and botttom of the image.
-// TODO(Martin): Probably can be very optimized by a simple line function.
-// TODO(Martin): Also, it looks jaggidy, not only because of no anti-aliasing.
 static void
-linear_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32 hex_color = 0x000000)
+linear_bezier_curve (Image image, s32 P0_x, s32 P0_y, s32 P1_x, s32 P1_y, u32 hex_color = 0x000000)
 {
     V3 color = to_color (hex_color);
 
-    double step_t=1.0/sqrt((P0_x-P1_x)*(P0_x-P1_x)+(P0_y-P1_y)*(P0_y-P1_y));
-    double t = 0;
-
-    while (t<=1) {
-        u32 x = (1.0-t)*P0_x+t*P1_x;
-        u32 y = (1.0-t)*P0_y+t*P1_y;
-        if ((x>=0 && x < image.w) && (y>=0 && y < image.h))
+    if (P1_x == P0_x && P1_y == P0_y)
+    {
+        return;
+    }
+    else if (abs(P1_x-P0_x)>=abs(P1_y-P0_y))
+    {
+        s32 step_x;
+        if (P1_x > P0_x) {step_x = 1;}
+        else {step_x = -1;}
+        r64 y = P0_y;
+        r64 step_y = (r64)(P1_y-P0_y)/(r64)(P1_x-P0_x);
+        for (s32 x = P0_x; x < P1_x; x=x+step_x)
         {
-            image.pixels[y * image.w + x] = color;
+            u32 y_floor = floor (y);
+            r64 y_dev = y - y_floor;
+            if (x>=0 && x<image.w && y_floor>=0 && y_floor<image.h)
+            {
+                V3 existing_color_0 = image.pixels[y_floor * image.w + x];
+                V3 new_color_0 = {};
+                new_color_0.r = y_dev*existing_color_0.r + (1-y_dev)*color.r;
+                new_color_0.g = y_dev*existing_color_0.g + (1-y_dev)*color.g;
+                new_color_0.b = y_dev*existing_color_0.b + (1-y_dev)*color.b;
+                image.pixels[y_floor * image.w + x] = new_color_0;
+
+                V3 existing_color_1 = image.pixels[(y_floor+1) * image.w + x];
+                V3 new_color_1 = {};
+                new_color_1.r = (1-y_dev)*existing_color_0.r + y_dev*color.r;
+                new_color_1.g = (1-y_dev)*existing_color_0.g + y_dev*color.g;
+                new_color_1.b = (1-y_dev)*existing_color_0.b + y_dev*color.b;
+                image.pixels[(y_floor+1) * image.w + x] = new_color_1;
+            }
+            y = y + step_y;
         }
-        t=t+step_t;
+    }
+    else
+    {
+        s32 step_y;
+        if (P1_y > P0_y) step_y = 1;
+        else step_y = -1;
+        r64 x = P0_x;
+        r64 step_x = (r64)(P1_x-P0_x)/(r64)(P1_y-P0_y);
+        for (s32 y = P0_y; y < P1_y; y=y+step_y)
+        {
+            u32 x_floor = floor (x);
+            r64 x_dev = x - x_floor;
+            if (x_floor>=0 && x_floor<image.w && y>=0 && y<image.h)
+            {
+                V3 existing_color_0 = image.pixels[y * image.w + x_floor];
+                V3 new_color_0 = {};
+                new_color_0.r = x_dev*existing_color_0.r + (1-x_dev)*color.r;
+                new_color_0.g = x_dev*existing_color_0.g + (1-x_dev)*color.g;
+                new_color_0.b = x_dev*existing_color_0.b + (1-x_dev)*color.b;
+                image.pixels[y * image.w + x_floor] = new_color_0;
+
+                V3 existing_color_1 = image.pixels[y * image.w + x_floor+1];
+                V3 new_color_1 = {};
+                new_color_1.r = (1-x_dev)*existing_color_0.r + x_dev*color.r;
+                new_color_1.g = (1-x_dev)*existing_color_0.g + x_dev*color.g;
+                new_color_1.b = (1-x_dev)*existing_color_0.b + x_dev*color.b;
+                image.pixels[y * image.w + x_floor+1] = new_color_1;
+            }
+            x = x + step_x;
+        }
     }
 
 }

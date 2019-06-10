@@ -17,6 +17,22 @@
  */
 
 
+//draw pixel with coordinates (x,y) and transarency c
+static void
+draw_pixel (Image image, s32 x, s32 y, u32 hex_color, r64 c)
+{
+    if (x<0 || x >=image.w || y<0 || y>=image.h ) return;
+
+    V3 color = to_color (hex_color);
+    V3 existing_color = image.pixels[y * image.w + x];
+    V3 new_color = {};
+    new_color.r = (1-c)*existing_color.r + c*color.r;
+    new_color.g = (1-c)*existing_color.g + c*color.g;
+    new_color.b = (1-c)*existing_color.b + c*color.b;
+    image.pixels[y * image.w + x] = new_color;
+
+}
+
 
 static void
 draw_vertical_line (Image image, u32 line_position_x, u32 hex_color = 0x000000, u32 line_width = 1)
@@ -118,7 +134,6 @@ draw_angle_line (Image image, u32 angle = 45, u32 hex_color = 0x000000, u32 corn
 static void
 linear_bezier_curve (Image image, s32 P0_x, s32 P0_y, s32 P1_x, s32 P1_y, u32 hex_color = 0x000000)
 {
-    V3 color = to_color (hex_color);
 
     if (P1_x == P0_x && P1_y == P0_y)
     {
@@ -135,25 +150,12 @@ linear_bezier_curve (Image image, s32 P0_x, s32 P0_y, s32 P1_x, s32 P1_y, u32 he
         {
             u32 y_floor = floor (y);
             r64 y_dev = y - y_floor;
-            if (x>=0 && x<image.w && y_floor>=0 && y_floor<image.h)
-            {
-                V3 existing_color_0 = image.pixels[y_floor * image.w + x];
-                V3 new_color_0 = {};
-                new_color_0.r = y_dev*existing_color_0.r + (1-y_dev)*color.r;
-                new_color_0.g = y_dev*existing_color_0.g + (1-y_dev)*color.g;
-                new_color_0.b = y_dev*existing_color_0.b + (1-y_dev)*color.b;
-                image.pixels[y_floor * image.w + x] = new_color_0;
-
-                V3 existing_color_1 = image.pixels[(y_floor+1) * image.w + x];
-                V3 new_color_1 = {};
-                new_color_1.r = (1-y_dev)*existing_color_0.r + y_dev*color.r;
-                new_color_1.g = (1-y_dev)*existing_color_0.g + y_dev*color.g;
-                new_color_1.b = (1-y_dev)*existing_color_0.b + y_dev*color.b;
-                image.pixels[(y_floor+1) * image.w + x] = new_color_1;
-            }
+            draw_pixel (image, x, y_floor, hex_color, 1-y_dev);
+            draw_pixel (image, x, y_floor+1, hex_color, y_dev);
             y = y + step_y;
         }
     }
+
     else
     {
         s32 step_y;
@@ -165,22 +167,8 @@ linear_bezier_curve (Image image, s32 P0_x, s32 P0_y, s32 P1_x, s32 P1_y, u32 he
         {
             u32 x_floor = floor (x);
             r64 x_dev = x - x_floor;
-            if (x_floor>=0 && x_floor<image.w && y>=0 && y<image.h)
-            {
-                V3 existing_color_0 = image.pixels[y * image.w + x_floor];
-                V3 new_color_0 = {};
-                new_color_0.r = x_dev*existing_color_0.r + (1-x_dev)*color.r;
-                new_color_0.g = x_dev*existing_color_0.g + (1-x_dev)*color.g;
-                new_color_0.b = x_dev*existing_color_0.b + (1-x_dev)*color.b;
-                image.pixels[y * image.w + x_floor] = new_color_0;
-
-                V3 existing_color_1 = image.pixels[y * image.w + x_floor+1];
-                V3 new_color_1 = {};
-                new_color_1.r = (1-x_dev)*existing_color_0.r + x_dev*color.r;
-                new_color_1.g = (1-x_dev)*existing_color_0.g + x_dev*color.g;
-                new_color_1.b = (1-x_dev)*existing_color_0.b + x_dev*color.b;
-                image.pixels[y * image.w + x_floor+1] = new_color_1;
-            }
+            draw_pixel (image, x_floor, y, hex_color, 1-x_dev);
+            draw_pixel (image, x_floor+1, y, hex_color, x_dev);
             x = x + step_x;
         }
     }

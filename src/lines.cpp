@@ -181,18 +181,18 @@ quadratic_bezier_curve (Image image, r64 P0_x, r64 P0_y, r64 P1_x, r64 P1_y, r64
 {
     r64 distance1 = sqrt((P0_x - P2_x)*(P0_x - P2_x) + (P0_y - P2_y)*(P0_y - P2_y));
     r64 distance2 = sqrt((P0_x - P1_x)*(P0_x - P1_x) + (P0_y - P1_y)*(P0_y - P1_y));
-    r64 distance3 = sqrt((P2_x - P1_x)*(P2_x - P1_x) + (P2_y - P1_y)*(P2_y - P1_y));
-    if(distance3 < 1 && distance2 < 1 && distance1 < 1)
+    if(distance2 < 1 && distance1 < 1)
         
     {
-        r64 x = P1_x;
-        r64 y = P1_y;
+        r64 x = P0_x;
+        r64 y = P0_y;
         r64 cx = x-floor(x);
         r64 cy = y-floor(y);
-        draw_pixel (image, floor(x), floor(y), hex_color, sqrt(distance1)*(1-cx)*(1-cy));
-        draw_pixel (image, floor(x)+1, floor(y), hex_color, sqrt(distance1)*cx*(1-cy));
-        draw_pixel (image, floor(x), floor(y)+1, hex_color, sqrt(distance1)*(1-cx)*cy);
-        draw_pixel (image, floor(x)+1, floor(y)+1, hex_color, sqrt(distance1)*cx*cy);
+        r64 anti_density = sqrt(distance1);
+        draw_pixel (image, floor(x), floor(y), hex_color, anti_density*(1-cx)*(1-cy));
+        draw_pixel (image, floor(x)+1, floor(y), hex_color, anti_density*cx*(1-cy));
+        draw_pixel (image, floor(x), floor(y)+1, hex_color, anti_density*(1-cx)*cy);
+        draw_pixel (image, floor(x)+1, floor(y)+1, hex_color, anti_density*cx*cy);
         
     }
 
@@ -203,27 +203,31 @@ quadratic_bezier_curve (Image image, r64 P0_x, r64 P0_y, r64 P1_x, r64 P1_y, r64
 
 }
 
-//build smooth path based on segments P0(x,y) - P1(x,y) - P2(x,y) - P3 (x,y)
-// TODO(Martin): Positions should be s32, otherwise we can't draw stuff to the left and botttom of the image.
+
 static void
-cubic_bezier_curve (Image image, u32 P0_x, u32 P0_y, u32 P1_x, u32 P1_y, u32 P2_x, u32 P2_y, u32 P3_x, u32 P3_y, u32 hex_color = 0x000000)
+cubic_bezier_curve (Image image, r64 P0_x, r64 P0_y, r64 P1_x, r64 P1_y, r64 P2_x, r64 P2_y, r64 P3_x, r64 P3_y, u32 hex_color = 0x000000)
 {
-    V3 color = to_color (hex_color);
+    r64 distance1 = sqrt((P0_x - P3_x)*(P0_x - P3_x) + (P0_y - P3_y)*(P0_y - P3_y));
+    r64 distance2 = sqrt((P0_x - P1_x)*(P0_x - P1_x) + (P0_y - P1_y)*(P0_y - P1_y));
+    r64 distance3 = sqrt((P0_x - P2_x)*(P0_x - P2_x) + (P0_y - P2_y)*(P0_y - P2_y));
+    if(distance3 < 1 && distance2 < 1 && distance1 < 1)
 
-    double segment1_lenth = sqrt((P0_x-P1_x)*(P0_x-P1_x)+(P0_y-P1_y)*(P0_y-P1_y));
-    double segment2_lenth = sqrt((P2_x-P1_x)*(P2_x-P1_x)+(P2_y-P1_y)*(P2_y-P1_y));
-    double segment3_lenth = sqrt((P2_x-P3_x)*(P2_x-P3_x)+(P2_y-P3_y)*(P2_y-P3_y));
-    double step_t=1.0/(segment1_lenth+segment2_lenth+segment3_lenth);
-    double t = 0;
+    {
+        r64 x = P0_x;
+        r64 y = P0_y;
+        r64 cx = x-floor(x);
+        r64 cy = y-floor(y);
+        r64 anti_density = sqrt(distance1);
+        draw_pixel (image, floor(x), floor(y), hex_color, anti_density*(1-cx)*(1-cy));
+        draw_pixel (image, floor(x)+1, floor(y), hex_color, anti_density*cx*(1-cy));
+        draw_pixel (image, floor(x), floor(y)+1, hex_color, anti_density*(1-cx)*cy);
+        draw_pixel (image, floor(x)+1, floor(y)+1, hex_color, anti_density*cx*cy);
 
-    while (t<=1) {
-        u32 x = (1.0-t)*(1.0-t)*(1.0-t)*P0_x+3*t*(1.0-t)*(1.0-t)*P1_x+3*t*t*(1.0-t)*P2_x+t*t*t*P3_x;
-        u32 y = (1.0-t)*(1.0-t)*(1.0-t)*P0_y+3*t*(1.0-t)*(1.0-t)*P1_y+3*t*t*(1.0-t)*P2_y+t*t*t*P3_y;
-        if ((x>=0 && x < image.w) && (y>=0 && y < image.h))
-        {
-            image.pixels[y * image.w + x] = color;
-        }
-        t=t+step_t;
+    }
+
+    else {
+        cubic_bezier_curve (image, P0_x, P0_y, (P0_x+P1_x)/2, (P0_y+P1_y)/2, (P0_x +2*P1_x + P2_x)/4, (P0_y +2*P1_y + P2_y)/4, (P0_x+3*P1_x+3*P2_x+P3_x)/8, (P0_y+3*P1_y+3*P2_y+P3_y)/8, hex_color);
+        cubic_bezier_curve (image, (P0_x+3*P1_x+3*P2_x+P3_x)/8, (P0_y+3*P1_y+3*P2_y+P3_y)/8, (P1_x +2*P2_x + P3_x)/4, (P1_y +2*P2_y + P3_y)/4, (P3_x+P2_x)/2, (P3_y+P2_y)/2, P3_x, P3_y, hex_color);
     }
 
 }

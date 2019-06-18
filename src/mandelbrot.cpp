@@ -24,10 +24,10 @@ static void
 draw_pure_mandelbrot (Image image, u32 hex_color, r32 scale, s32 shift_x, s32 shift_y, u32 max_steps=100)
 {
     V3 pixel = to_color (hex_color);
-    
+
     s32 image_w = image.w;
     s32 image_h = image.h;
-    
+
     for (s32 y = 0; y < image_h; y++)
     {
         for (s32 x = 0; x < image_w; x++)
@@ -36,15 +36,15 @@ draw_pure_mandelbrot (Image image, u32 hex_color, r32 scale, s32 shift_x, s32 sh
             r64 cor_y = 0.0;
             r64 x_c = (r64) (x-shift_x) / (image_w * scale);
             r64 y_c = (r64) (y-shift_y) / (image_h * scale);
-            
+
             for (u32 steps = 0; ; ++steps) {
                 r64 x_test = cor_x;
                 r64 y_test = cor_y;
                 cor_x = x_test*x_test - y_test*y_test + x_c;
                 cor_y = 2 * x_test * y_test + y_c;
-                
+
                 if (cor_x*cor_x + cor_y*cor_y > 4) break;
-                
+
                 if (steps > max_steps)
                 {
                     image.pixels[y * image.w + x] = pixel;
@@ -53,7 +53,7 @@ draw_pure_mandelbrot (Image image, u32 hex_color, r32 scale, s32 shift_x, s32 sh
             }
         }
     }
-    
+
 }
 
 
@@ -87,11 +87,11 @@ draw_mandelbrot_convergence (Image image, u32 hex_color1, u32 hex_color2, r32 sc
                 r64 y_test = cor_y;
                 cor_x = x_test*x_test - y_test*y_test + x_c;
                 cor_y = 2 * x_test * y_test + y_c;
-                
+
                 if (cor_x*cor_x+cor_y*cor_y > 4)
                 {
                     u32 draw_step = steps % 60;
-                    
+
                     if (draw_step < 20)
                     {
                         r64 transit = draw_step/20.0;
@@ -119,7 +119,7 @@ draw_mandelbrot_convergence (Image image, u32 hex_color1, u32 hex_color2, r32 sc
                         image.pixels[y * image.w + x] = pixel;
                         break;
                     }
-                    
+
                 }
                 if (steps > max_steps)
                 {
@@ -133,5 +133,121 @@ draw_mandelbrot_convergence (Image image, u32 hex_color1, u32 hex_color2, r32 sc
         }
     }
     
+}
+
+
+//by default try constant x = 0,28, constant y = 0,0113
+static void
+draw_pure_julia (Image image, u32 hex_color, r64 constant_x, r64 constant_y, r32 scale, s32 shift_x, s32 shift_y, u32 max_steps=100)
+{
+    V3 pixel = to_color (hex_color);
+
+    s32 image_w = image.w;
+    s32 image_h = image.h;
+    r64 R = (1 + sqrt (1 + 4* sqrt (constant_x*constant_x + constant_y*constant_y)));
+
+    for (s32 y = 0; y < image_h; y++)
+    {
+        for (s32 x = 0; x < image_w; x++)
+        {
+            r64 x_scale = (r64) (x-shift_x) / (image_w * scale);
+            r64 y_scale = (r64) (y-shift_y) / (image_h * scale);
+
+            for (u32 steps = 0; ; ++steps) {
+                r64 x_test = x_scale;
+                r64 y_test = y_scale;
+                x_scale = x_test*x_test - y_test*y_test + constant_x;
+                y_scale = 2 * x_test * y_test + constant_y;
+
+                if (x_scale*x_scale + y_scale*y_scale > R) break;
+
+                if (steps > max_steps)
+                {
+                    image.pixels[y * image.w + x] = pixel;
+                    break;
+                }
+            }
+        }
+    }
+
+}
+
+
+
+static void
+draw_julia_convergence (Image image, u32 hex_color1, u32 hex_color2, r64 constant_x, r64 constant_y, r32 scale, s32 shift_x, s32 shift_y, u32 max_steps=100)
+{
+    V3 c1 = to_color (hex_color1);
+    V3 c2 = to_color (hex_color2);
+    u8 r1 = c1.r;
+    u8 g1 = c1.g;
+    u8 b1 = c1.b;
+    u8 r2 = c2.r;
+    u8 g2 = c2.g;
+    u8 b2 = c2.b;
+
+    s32 image_w = image.w;
+    s32 image_h = image.h;
+    r64 R = (1 + sqrt (1 + 4* sqrt (constant_x*constant_x + constant_y*constant_y)));
+
+    for (s32 y = 0; y < image_h; y++)
+    {
+        V3 pixel = {};
+        for (s32 x = 0; x < image_w; x++)
+        {
+            r64 x_scale = (r64) (x-shift_x) / (image_w * scale);
+            r64 y_scale = (r64) (y-shift_y) / (image_h * scale);
+
+            for (u32 steps = 0; ; ++steps) {
+                r64 x_test = x_scale;
+                r64 y_test = y_scale;
+                x_scale = x_test*x_test - y_test*y_test + constant_x;
+                y_scale = 2 * x_test * y_test + constant_y;
+
+                if (x_scale*x_scale + y_scale*y_scale > R)
+                {
+                    u32 draw_step = steps % 60;
+
+                    if (draw_step < 20)
+                    {
+                        r64 transit = draw_step/20.0;
+                        pixel.r = r1 + transit*(255-r1);
+                        pixel.g = g1 + transit*(255-g1);
+                        pixel.b = b1 + transit*(255-b1);
+                        image.pixels[y * image.w + x] = pixel;
+                        break;
+                    }
+                    else if (draw_step >= 20 && draw_step < 40)
+                    {
+                        r64 transit = (draw_step-20.0)/20.0;
+                        pixel.r = 255 - transit*(255-r2);
+                        pixel.g = 255 - transit*(255-g2);
+                        pixel.b = 255 - transit*(255-b2);
+                        image.pixels[y * image.w + x] = pixel;
+                        break;
+                    }
+                    else
+                    {
+                        r64 transit = (draw_step-40.0)/20.0;
+                        pixel.r = r2*(1-transit) + transit*r1;
+                        pixel.g = g2*(1-transit) + transit*g1;
+                        pixel.b = b2*(1-transit) + transit*b1;
+                        image.pixels[y * image.w + x] = pixel;
+                        break;
+                    }
+                }
+
+                if (steps > max_steps)
+                {
+                    pixel.r = 0;
+                    pixel.g = 0;
+                    pixel.b = 0;
+                    image.pixels[y * image.w + x] = pixel;
+                    break;
+                }
+            }
+        }
+    }
+
 }
 

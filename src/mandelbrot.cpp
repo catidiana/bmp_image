@@ -173,7 +173,7 @@ draw_pure_julia (Image image, u32 hex_color, r64 constant_x, r64 constant_y, r32
 }
 
 
-
+// fun constants to try (- 0.8; 0.156), (0.285,  0.01), ( -0.0085, 0.71), (-0.74543, 0.11301)
 static void
 draw_julia_convergence (Image image, u32 hex_color1, u32 hex_color2, r64 constant_x, r64 constant_y, r32 scale, s32 shift_x, s32 shift_y, u32 max_steps=100)
 {

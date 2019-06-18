@@ -204,7 +204,7 @@ draw_julia_convergence (Image image, u32 hex_color1, u32 hex_color2, r64 constan
                 x_scale = x_test*x_test - y_test*y_test + constant_x;
                 y_scale = 2 * x_test * y_test + constant_y;
 
-                if (x_scale*x_scale + y_scale*y_scale > R)
+                if (x_scale*x_scale + y_scale*y_scale > R+1)
                 {
                     u32 draw_step = steps % 60;
 

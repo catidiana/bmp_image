@@ -286,6 +286,7 @@ main (int argc, char **argv)
                                          -20000 + mouse_screen_x - window_w / 2,
                                          -31000 - mouse_screen_y + window_h / 2,
                                          x / 2 % 200);*/
+    //draw_julia_convergence (images[4], 0x0000ff, 0xffa000, -0.1, 0.651, 0.35, 150, 150, x%500);
 draw_julia_convergence (images[4], 0x0000ff, 0xffa000, 0.7885*cos(x*M_PI/180), 0.7885*sin(x*M_PI/180), 0.3, 150, 150);
 
 

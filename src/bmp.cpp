@@ -282,10 +282,10 @@ main (int argc, char **argv)
       draw_angle_line (images[3], x, 0xff8f43, 150, 150, 15);
 
       uniform_fill    (images[4], 0x771111);
-      draw_mandelbrot_convergence (images[4], 0xffaa00, 0x1730e5, 0.5,
-                                   240 + mouse_screen_x - window_w / 2,
-                                   150 - mouse_screen_y + window_h / 2,
-                                   x / 2 % 20);
+      draw_mandelbrot_convergence (images[4], 0xffaa00, 0x1730e5, 200,
+                                         -20000 + mouse_screen_x - window_w / 2,
+                                         -31000 - mouse_screen_y + window_h / 2,
+                                         x / 2 % 200);
 
       draw_gradient_tiles (images[5], -x, -x);
       quadratic_bezier_curve (images[5], x % 100, x % 100, 20 + (x % 100) *2, 30 + x % 100, 300 - x % 100, 300 - (x % 100) * 2, 0xff8f43);

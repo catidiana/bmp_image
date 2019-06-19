@@ -16,12 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //draw pixel with coordinates (x,y) and transarency c
 static void
 draw_pixel (Image image, s32 x, s32 y, u32 hex_color, r64 c)
 {
-    if (x<0 || x >=image.w || y<0 || y>=image.h ) return;
+    s32 image_w = image.w;
+    s32 image_h = image.h;
+    if (x<0 || x >=image_w || y<0 || y>=image_h ) return;
 
     V3 color = to_color (hex_color);
     V3 existing_color = image.pixels[y * image.w + x];
@@ -32,6 +33,7 @@ draw_pixel (Image image, s32 x, s32 y, u32 hex_color, r64 c)
     image.pixels[y * image.w + x] = new_color;
 
 }
+
 
 
 static void
@@ -85,6 +87,8 @@ static void
 draw_angle_line (Image image, u32 angle = 45, u32 hex_color = 0x000000, u32 corner_x = 0, u32 corner_y = 0, u32 line_width = 1)
 {
     V3 color = to_color (hex_color);
+    s32 image_w = image.w;
+    s32 image_h = image.h;
 
     angle = angle%180;
     if (angle==0)
@@ -101,13 +105,13 @@ draw_angle_line (Image image, u32 angle = 45, u32 hex_color = 0x000000, u32 corn
     {
         double alfa = tan(angle*M_PI/180.0);
         line_width = line_width/abs(cos(angle*M_PI/180.0));
-        for (u32 x = 0; x < image.w; x++)
+        for (s32 x = 0; x < image_w; x++)
         {
             s32 y_start = corner_y + alfa*x - alfa*corner_x - line_width/2;
             s32 y_finish = corner_y + alfa*x - alfa*corner_x + line_width/2 +line_width%2;
-                    for (s32 y = y_start; y < y_finish; y++)
+            for (s32 y = y_start; y < y_finish; y++)
             {
-                if(y >= 0 && y< image.h)
+                if(y >= 0 && y< image_h)
 
                     image.pixels[y * image.w + x] = color;
             }
@@ -116,13 +120,13 @@ draw_angle_line (Image image, u32 angle = 45, u32 hex_color = 0x000000, u32 corn
     else {
         double alfa = 1/tan(angle*M_PI/180.0);
         line_width = line_width/sin(angle*M_PI/180.0);
-        for (u32 y = 0; y < image.h; y++)
+        for (s32 y = 0; y < image_h; y++)
         {
             s32 x_start = corner_x + alfa*y - alfa*corner_y - line_width/2;
             s32 x_finish = corner_x + alfa*y - alfa*corner_y + line_width/2 +line_width%2;
-                    for (s32 x = x_start; x < x_finish; x++)
+            for (s32 x = x_start; x < x_finish; x++)
             {
-                if(x >= 0 && x < image.w)
+                if(x >= 0 && x < image_w)
 
                     image.pixels[y * image.w + x] = color;
             }
@@ -174,7 +178,6 @@ linear_bezier_curve (Image image, s32 P0_x, s32 P0_y, s32 P1_x, s32 P1_y, u32 he
     }
 
 }
-
 
 static void
 quadratic_bezier_curve (Image image, r64 P0_x, r64 P0_y, r64 P1_x, r64 P1_y, r64 P2_x, r64 P2_y, u32 hex_color = 0x000000)

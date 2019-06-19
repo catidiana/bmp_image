@@ -24,24 +24,26 @@ static void
 draw_square (Image image, s32 center_x, s32 center_y, u32 square_w, u32 hex_color = 0x000000)
 {
     V3 color = to_color (hex_color);
+    s32 image_w = image.w;
+    s32 image_h = image.h;
 
     s32 start_x = center_x - square_w/2;
     s32 finish_x = center_x + square_w/2 + square_w%2;
     if (start_x < 0) start_x = 0;
-    if (start_x > image.w) return;
+    if (start_x > image_w) return;
     if (finish_x < 0) return;
-    if (finish_x > image.w) finish_x = image.w;
+    if (finish_x > image_w) finish_x = image_w;
 
     s32 start_y = center_y - square_w/2;
     s32 finish_y = center_y + square_w/2 + square_w%2;
     if (start_y < 0) start_y = 0;
-    if (start_y > image.h) return;
+    if (start_y > image_h) return;
     if (finish_y < 0) return;
-    if (finish_y > image.h) finish_y = image.h;
-    
-    for (u32 y = start_y; y < finish_y; y++)
+    if (finish_y > image_h) finish_y = image_h;
+
+    for (s32 y = start_y; y < finish_y; y++)
     {
-        for (u32 x = start_x; x < finish_x; x++)
+        for (s32 x = start_x; x < finish_x; x++)
         {
             image.pixels[y * image.w + x] = color;
         }
@@ -53,31 +55,31 @@ static void
 draw_rectangle (Image image, s32 center_x, s32 center_y, u32 rect_w, u32 rect_h, u32 hex_color = 0x000000)
 {
     V3 color = to_color (hex_color);
-    
+    s32 image_w = image.w;
+    s32 image_h = image.h;
+
     s32 start_x = center_x - rect_w/2;
     s32 finish_x = center_x + rect_w/2 + rect_w%2;
     if (start_x < 0) start_x = 0;
-    if (start_x > image.w) return;
+    if (start_x > image_w) return;
     if (finish_x < 0) return;
-    if (finish_x > image.w) finish_x = image.w;
+    if (finish_x > image_w) finish_x = image_w;
 
     s32 start_y = center_y - rect_h/2;
     s32 finish_y = center_y + rect_h/2 + rect_h%2;
     if (start_y < 0) start_y = 0;
-    if (start_y > image.h) return;
+    if (start_y > image_h) return;
     if (finish_y < 0) return;
-    if (finish_y > image.h) finish_y = image.h;
+    if (finish_y > image_h) finish_y = image_h;
 
-    for (u32 y = start_y; y < finish_y; y++)
+    for (s32 y = start_y; y < finish_y; y++)
     {
-        for (u32 x = start_x; x < finish_x; x++)
+        for (s32 x = start_x; x < finish_x; x++)
         {
             image.pixels[y * image.w + x] = color;
         }
     }
 }
-
-
 
 static void
 draw_circle (Image image, u32 radius, u32 center_x, u32 center_y, u32 hex_color = 0x000000)
@@ -95,10 +97,11 @@ draw_circle (Image image, u32 radius, u32 center_x, u32 center_y, u32 hex_color 
 }
 
 
+
 static void
 draw_ellipse (Image image, u32 ellipse_w, u32 ellipse_h, u32 center_x, u32 center_y, u32 hex_color = 0x000000)
 {
-    V3 color = to_color (hex_color);    
+    V3 color = to_color (hex_color);
     
     for (u32 y = 0; y < image.h; y++)
     {
@@ -116,7 +119,7 @@ draw_ellipse (Image image, u32 ellipse_w, u32 ellipse_h, u32 center_x, u32 cente
 static void
 draw_equilateral_triangle (Image image, u32 tringle_side, u32 corner_x = 0, u32 corner_y = 0, u32 hex_color = 0x000000)
 {
-    V3 color = to_color (hex_color); 
+    V3 color = to_color (hex_color);
     
     for (u32 y = 0; y < image.h; y++)
     {
